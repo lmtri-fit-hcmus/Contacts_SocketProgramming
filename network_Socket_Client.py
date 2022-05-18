@@ -15,7 +15,7 @@ HOST = "127.0.0.1"
 SERVER_PORT= 65432
 FORMAT = "utf8"
 LOGIN= "login"
-PATH = "E:\\Python\\tkinter\\image\\1.png"
+PATH = "1.png"
 
 class SearchListWindow(tk.Frame):
     def __init__(self, parent, appController):
@@ -41,7 +41,7 @@ class SearchListWindow(tk.Frame):
         tv.heading("Avatar",text="Avatar",anchor=CENTER)
         tv.heading("Download",text="Download",anchor=CENTER)
 
-        img=ImageTk.PhotoImage(Image.open("E://Python/tkinter/image/"+str(1)+".png"))
+        img=ImageTk.PhotoImage(Image.open(str(1)+".png"))
 
         my_label=Label(image=img)
         my_label.pack()
@@ -51,8 +51,8 @@ class SearchListWindow(tk.Frame):
         my_img
 
         # Add data test
-        for i in range(1,5):
-            tv.insert(parent='',index='end',iid=i,text="",values=(str(i),"Le Ngoc Duc",ImageTk.PhotoImage(Image.open("E://Python/tkinter/image/"+str(i)+".png")),"Down"))
+        # for i in range(1,5):
+        #     tv.insert(parent='',index='end',iid=i,text="",values=(str(i),"Le Ngoc Duc",ImageTk.PhotoImage(Image.open(str(i)+".png")),"Down"))
         
         btn_logout=tk.Button(self,text="Log Out", command=lambda:appController.showPage(HomePage))
         btn_logout.pack()
