@@ -54,15 +54,21 @@ def run():
     except KeyboardInterrupt:
         print("error")
 
-def connect_db():
+def connect_db(db_name):
+    # driver = "ODBC Driver 17 for SQL Server"
+    # server = 'HUUTRONG'
+    # db = 'Contacts'
+    # user = 'socket'
+    # password = '123456'
+
     driver = "ODBC Driver 17 for SQL Server"
-    server = 'HUUTRONG'
-    db = 'Contacts'
-    user = 'socket'
-    password = '123456'
+    server = 'MINHTRI\MINHTRI'
+    db = db_name
+    user = 'lmtri'
+    password = '1'
+
     cnxn = pyodbc.connect('driver={%s};server=%s;database=%s;uid=%s;pwd=%s' % ( driver, server, db, user, password ) )
     return cnxn.cursor()
-
 
 def checkLiveAccount(username):
     for live_acc in Live_Account:
@@ -73,7 +79,7 @@ def checkLiveAccount(username):
 
 
 def checkLogin(username: string, password: string):
-    cursor = connect_db()
+    cursor = connect_db('SocketAccount')
     cursor.execute("select acc.username from Account acc ")
     
     if checkLiveAccount(username) == 0:
@@ -111,7 +117,7 @@ def Login(sck: socket, addr):
 
 def getTotalList():
     lists = []
-    cursor = connect_db()
+    cursor = connect_db('Contacts')
     cursor.execute("select * from  Member ")
     for row in cursor:
         st = str(row)
@@ -131,7 +137,7 @@ def sendTotalList(sck: socket, addr):
 
 def sendSpecificContact(conn: socket, addr):
     id = conn.recv(1024).decode(FORMAT)
-    cursor = connect_db()
+    cursor = connect_db('Contact')
     cursor.execute("select * from Member M where M.ID = (?)", (id))
     contact = str(cursor.fetchone())
     conn.sendall(contact.encode(FORMAT))

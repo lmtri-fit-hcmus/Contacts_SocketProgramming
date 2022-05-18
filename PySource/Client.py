@@ -103,10 +103,6 @@ try:
     elif accepted == 2:
         print("Wrong username or password")
     input()
-    
-
-
-    
 except:
     print("Error")
 
