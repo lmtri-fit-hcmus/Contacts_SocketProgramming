@@ -9,12 +9,14 @@ import pyodbc
 
 
 HOST = "127.0.0.1"
-PORT = 65432
+PORT = 65535
 FORMAT = "utf8"
 
 TOTALCONTACT = "TotalContacts"
 SPECONTACT = "SpecificContact"
 LOGIN = "login"
+END = "x"
+
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
@@ -51,24 +53,18 @@ def run():
             clientThread = threading.Thread(target = handle_client_resquest,args=[conn, addr] )
             clientThread.daemon = False
             clientThread.start()
+        
     except KeyboardInterrupt:
         print("error")
 
 def connect_db(db_name):
-    # driver = "ODBC Driver 17 for SQL Server"
-    # server = 'HUUTRONG'
-    # db = 'Contacts'
-    # user = 'socket'
-    # password = '123456'
-
     driver = "ODBC Driver 17 for SQL Server"
-    server = 'MINHTRI\MINHTRI'
-    db = db_name
-    user = 'lmtri'
-    password = '1'
-
-    cnxn = pyodbc.connect('driver={%s};server=%s;database=%s;uid=%s;pwd=%s' % ( driver, server, db, user, password ) )
+    server = 'HUUTRONG'
+    user = 'socket'
+    password = '123456'
+    cnxn = pyodbc.connect('driver={%s};server=%s;database=%s;uid=%s;pwd=%s' % ( driver, server, db_name, user, password ) )
     return cnxn.cursor()
+
 
 def checkLiveAccount(username):
     for live_acc in Live_Account:
@@ -77,6 +73,14 @@ def checkLiveAccount(username):
             return 0
     return 1
 
+def removeLiveAccount(conn, addr):
+    for row in Live_Account:
+        addr_saved, user_saved = row.split('-')
+        print(addr_saved, addr)
+        if(addr_saved == str(addr)):
+            Live_Account.remove(row)
+            print(Live_Account)
+            break
 
 def checkLogin(username: string, password: string):
     cursor = connect_db('SocketAccount')
@@ -137,22 +141,30 @@ def sendTotalList(sck: socket, addr):
 
 def sendSpecificContact(conn: socket, addr):
     id = conn.recv(1024).decode(FORMAT)
-    cursor = connect_db('Contact')
+    cursor = connect_db('Contacts')
     cursor.execute("select * from Member M where M.ID = (?)", (id))
     contact = str(cursor.fetchone())
+    print(contact)
     conn.sendall(contact.encode(FORMAT))
 
 
 def handle_client_resquest(conn:socket, addr):
-    #Login(conn,addr)
-    while True:
-        option = conn.recv(1024).decode(FORMAT)
-        print(option)
-        if option == TOTALCONTACT:
-            sendTotalList(conn,addr)
-        elif option == LOGIN:
-            Login(conn,addr)
-
+    try:
+        Login(conn,addr)
+        option = None
+        while option != END:
+            option = conn.recv(1024).decode(FORMAT)
+            print(option)
+            if option == TOTALCONTACT:
+                conn.sendall(option.encode(FORMAT))
+                sendTotalList(conn,addr)
+            elif option == SPECONTACT:
+                conn.sendall(option.encode(FORMAT))
+                sendSpecificContact(conn, addr)
+        print("stop")
+        removeLiveAccount(conn, addr)
+    except ConnectionResetError:
+        print("Client end!")
 run()
 
 
