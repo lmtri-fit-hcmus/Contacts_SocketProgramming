@@ -50,13 +50,10 @@ def TotalContact(client):
 #đầu ra là list chứa thuộc tính của 1 member có ID cụ thể,
 #nếu không tìm thấy, in ra not found
 def GetSpecificContact(client, ID):
+    client.recv(1024)
     client.sendall(ID.encode(FORMAT))
     msg = client.recv(1024).decode(FORMAT)
-    if(msg == 'found'):
-        list = ReceiveList(client)
-        return list
-    else:
-        print(msg)
+    return msg
 #------------------main-----------------------
 
 # client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

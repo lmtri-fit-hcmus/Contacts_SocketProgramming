@@ -1,3 +1,4 @@
+from multiprocessing.connection import Client
 from pydoc import cli
 import tkinter as tk
 from tkinter import ttk 
@@ -11,11 +12,13 @@ from tkinter import Tk, Button, Canvas
 from PIL import Image, ImageFont
 from matplotlib import image
 
+import Client
 
 HOST = "127.0.0.1"
 SERVER_PORT= 65432
 FORMAT = "utf8"
 LOGIN= "login"
+LOGOUT = "logout"
 PATH = "1.png"
 
 class SearchListWindow(tk.Frame):
@@ -62,7 +65,7 @@ class SearchListWindow(tk.Frame):
 
         
 
-class SearchEntire(tk.Frame):
+class SpecificContactWindow(tk.Frame):
     def __init__(self, parent,appController):
         tk.Frame.__init__(self,parent)
 
@@ -71,10 +74,10 @@ class SearchEntire(tk.Frame):
         #label_title=tk.Label(self,image=img2)
         #label_title.pack()
 
-        label_mu=tk.Label(self,text="Heloo")
-        btn_logout=tk.Button(self,text="Log Out", command=lambda:appController.showPage(HomePage))
+        self.label_mu=tk.Label(self,text="")
+        btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(HomePage))
 
-        label_mu.pack()
+        self.label_mu.pack()
         btn_logout.pack()
         # global img
         #img.show()
@@ -121,9 +124,9 @@ class HomePage(tk.Frame):
         label_title=tk.Label(self, text="HOME PAGE",font="Arial,45")
         label_user=tk.Label(self,text="Find")
         self.entry_user=tk.Entry(self,width=20, bg='light yellow',borderwidth=5)
-        btn_SearchList=tk.Button(self,text="Search List",command=lambda:appController.showPage(SearchListWindow))
-        btn_Search=tk.Button(self,text="Search",command=lambda:appController.showPage(SearchEntire))
-        btn_logout=tk.Button(self,text="Log Out", command=lambda:appController.showPage(StartPage))
+        btn_SearchList=tk.Button(self,text="Search List",command=lambda:appController.showTotalContact(SearchListWindow,client))
+        btn_Search=tk.Button(self,text="Search",command=lambda:appController.showSpecificContact(self,client))
+        btn_logout=tk.Button(self,text="Log Out", command=lambda:appController.logOut(client))
         self.label_notice1=tk.Label(self, text="")
         self.label_notice2=tk.Label(self, text="")
         self.label_notice3=tk.Label(self, text="")
@@ -145,7 +148,7 @@ class App(tk.Tk):
         tk.Tk.__init__(self)
 
         self.title("Socket Application")
-        self.geometry("700x200")
+        self.geometry("900x300")
         self.resizable(width=True, height=True)
 
         container=tk.Frame()
@@ -171,7 +174,7 @@ class App(tk.Tk):
         #home_page.tkraise()
 
         self.frames={}
-        for F in (StartPage,HomePage,SearchEntire,SearchListWindow):
+        for F in (StartPage,HomePage,SpecificContactWindow,SearchListWindow):
             frame=F(container, self)
             frame.grid(row=0,column=0,sticky="nsew")
             self.frames[F]=frame
@@ -232,6 +235,27 @@ class App(tk.Tk):
         except:
             print("Error: Server iss not responding")
 
+    def showTotalContact(self, curFrame, sck):
+        sck.sendall(Client.TOTALCONTACT.encode(FORMAT))
+        sck.recv(1024)
+        ListContacts = Client.TotalContact(sck)
+        print(ListContacts)
+        self.showPage(curFrame)
+
+    def showSpecificContact(self,curFrame,sck):
+        ID = curFrame.entry_user.get()
+        sck.sendall(Client.SPECONTACT.encode(FORMAT))
+        SpeClient = Client.GetSpecificContact(sck,ID)
+        if SpeClient == 'None':
+            self.frames[SpecificContactWindow].label_mu["text"] = "Not Found"
+        else:
+            self.frames[SpecificContactWindow].label_mu["text"] = SpeClient
+        self.showPage(SpecificContactWindow)
+        
+    def logOut(self, sck):
+        sck.sendall(LOGOUT.encode(FORMAT))
+        sck.recv(1024)
+        self.showPage(StartPage)
 
 client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 print("CLIENT SIDE")

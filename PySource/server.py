@@ -15,6 +15,7 @@ FORMAT = "utf8"
 TOTALCONTACT = "TotalContacts"
 SPECONTACT = "SpecificContact"
 LOGIN = "login"
+LOGOUT = "logout"
 END = "x"
 
 
@@ -169,6 +170,9 @@ def handle_client_resquest(conn:socket, addr):
             elif option == LOGIN:
                 conn.sendall(option.encode(FORMAT))
                 Login(conn,addr)
+            elif option == LOGOUT:
+                conn.sendall(option.encode(FORMAT))
+                removeLiveAccount(conn, addr)
         print("stop")
         removeLiveAccount(conn, addr)
     except ConnectionResetError:
