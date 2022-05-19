@@ -9,7 +9,7 @@ import pyodbc
 
 
 HOST = "127.0.0.1"
-PORT = 65535
+PORT = 65432
 FORMAT = "utf8"
 
 TOTALCONTACT = "TotalContacts"
@@ -58,10 +58,16 @@ def run():
         print("error")
 
 def connect_db(db_name):
+    # driver = "ODBC Driver 17 for SQL Server"
+    # server = 'HUUTRONG'
+    # user = 'socket'
+    # password = '123456'
+
     driver = "ODBC Driver 17 for SQL Server"
-    server = 'HUUTRONG'
-    user = 'socket'
-    password = '123456'
+    server = 'MINHTRI\MINHTRI'
+    user = 'lmtri'
+    password = '1'
+
     cnxn = pyodbc.connect('driver={%s};server=%s;database=%s;uid=%s;pwd=%s' % ( driver, server, db_name, user, password ) )
     return cnxn.cursor()
 
@@ -150,7 +156,6 @@ def sendSpecificContact(conn: socket, addr):
 
 def handle_client_resquest(conn:socket, addr):
     try:
-        Login(conn,addr)
         option = None
         while option != END:
             option = conn.recv(1024).decode(FORMAT)
@@ -161,6 +166,9 @@ def handle_client_resquest(conn:socket, addr):
             elif option == SPECONTACT:
                 conn.sendall(option.encode(FORMAT))
                 sendSpecificContact(conn, addr)
+            elif option == LOGIN:
+                conn.sendall(option.encode(FORMAT))
+                Login(conn,addr)
         print("stop")
         removeLiveAccount(conn, addr)
     except ConnectionResetError:
@@ -169,7 +177,7 @@ run()
 
 
     
-# id = "20120506"
+# id = "20120506"lmtri  
 # cursor = connect_db()
 # cursor.execute("select * from Member M where M.ID = (?)", (id))
 # print(str(cursor.fetchone()))

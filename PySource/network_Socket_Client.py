@@ -188,6 +188,7 @@ class App(tk.Tk):
         try:
             # Get data from box
             client.sendall(LOGIN.encode(FORMAT))
+            client.recv(1024)
             user=curFrame.entry_user.get()
             pswd=curFrame.entry_pswd.get()
             client.sendall(user.encode(FORMAT))
