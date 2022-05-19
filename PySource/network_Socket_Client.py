@@ -1,3 +1,4 @@
+from pydoc import cli
 import tkinter as tk
 from tkinter import ttk 
 from tkinter.ttk import *
@@ -186,8 +187,14 @@ class App(tk.Tk):
     def logIn(self, curFrame, sck):
         try:
             # Get data from box
+            client.sendall(LOGIN.encode(FORMAT))
             user=curFrame.entry_user.get()
             pswd=curFrame.entry_pswd.get()
+            client.sendall(user.encode(FORMAT))
+            client.recv(1024)
+
+            client.sendall(pswd.encode(FORMAT))
+            accepted = int(client.recv(1024).decode(FORMAT))
 
             # If boxes are empty
             if user == "" or pswd == "":
@@ -209,11 +216,13 @@ class App(tk.Tk):
             # ____________________
             # TEST
             
-            msg='true'
             
             # ____________________
-            if(msg=="fail"):
+            if(accepted==2):
                 curFrame.label_notice["text"]="Invalid password"
+                return
+            elif(accepted==0):
+                curFrame.label_notice["text"]="Account has been login by another"
                 return
             else:
                 self.showPage(HomePage)
@@ -225,7 +234,11 @@ class App(tk.Tk):
 
 client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 print("CLIENT SIDE")
-
+try:
+    client.connect( (HOST, SERVER_PORT) )
+    print("client address:",client.getsockname())
+except:
+    print("Unable to connect to HOST")
 app=App()
 #app.showPage(HomePage)
 app.mainloop()

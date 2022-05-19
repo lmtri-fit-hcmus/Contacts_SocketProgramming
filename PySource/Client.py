@@ -2,7 +2,7 @@ from pydoc import cli
 import socket
 
 HOST = "127.0.0.1"
-SERVER_PORT = 65535
+SERVER_PORT = 65432
 FORMAT = "utf8"
 
 TOTALCONTACT = "TotalContacts"
@@ -59,52 +59,52 @@ def GetSpecificContact(client, ID):
         print(msg)
 #------------------main-----------------------
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print("CLIENT SIDE")
+# client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# print("CLIENT SIDE")
 
 
-try:
-    client.connect( (HOST, SERVER_PORT) )
-    print("client address:",client.getsockname())
+# try:
+#     client.connect( (HOST, SERVER_PORT) )
+#     print("client address:",client.getsockname())
 
     
-    user = input("User:")
-    client.sendall(user.encode(FORMAT))
-    client.recv(1024)
+#     user = input("User:")
+#     client.sendall(user.encode(FORMAT))
+#     client.recv(1024)
 
 
-    passw = input("Pass:")
-    client.sendall(passw.encode(FORMAT))
+#     passw = input("Pass:")
+#     client.sendall(passw.encode(FORMAT))
 
-    accepted = int(client.recv(1024).decode(FORMAT))
-    print(accepted)
-    if (accepted == 0): 
-        print("Account has been login by another")
-    elif accepted == 1:
-        print("Successfully login")
-        msg = None
-        while (msg != "x"):
-            msg = input("talk: ")
-            client.sendall(msg.encode(FORMAT))
+#     accepted = int(client.recv(1024).decode(FORMAT))
+#     print(accepted)
+#     if (accepted == 0): 
+#         print("Account has been login by another")
+#     elif accepted == 1:
+#         print("Successfully login")
+#         msg = None
+#         while (msg != "x"):
+#             msg = input("talk: ")
+#             client.sendall(msg.encode(FORMAT))
 
-            # functions called by client 
-            # if (msg == LOGIN): 
-            #     # wait response
-            #     client.recv(1024)
-            #     clientLogin(client)
-            if(msg == TOTALCONTACT):
-                lists = TotalContact(client)
-                print(lists)
-            elif(msg == SPECONTACT):
-                client.recv(1024)
-                ID = input("Input ID to check contact: ")
-                lists = GetSpecificContact(client,ID)
-                print(lists)
-    elif accepted == 2:
-        print("Wrong username or password")
-    input()
-except:
-    print("Error")
+#             # functions called by client 
+#             # if (msg == LOGIN): 
+#             #     # wait response
+#             #     client.recv(1024)
+#             #     clientLogin(client)
+#             if(msg == TOTALCONTACT):
+#                 lists = TotalContact(client)
+#                 print(lists)
+#             elif(msg == SPECONTACT):
+#                 client.recv(1024)
+#                 ID = input("Input ID to check contact: ")
+#                 lists = GetSpecificContact(client,ID)
+#                 print(lists)
+#     elif accepted == 2:
+#         print("Wrong username or password")
+#     input()
+# except:
+#     print("Error")
 
 
-client.close()
+# client.close()

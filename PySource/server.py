@@ -9,7 +9,7 @@ import pyodbc
 
 
 HOST = "127.0.0.1"
-PORT = 65535
+PORT = 65432
 FORMAT = "utf8"
 
 TOTALCONTACT = "TotalContacts"
@@ -144,12 +144,14 @@ def sendSpecificContact(conn: socket, addr):
 
 
 def handle_client_resquest(conn:socket, addr):
-    Login(conn,addr)
+    #Login(conn,addr)
     while True:
         option = conn.recv(1024).decode(FORMAT)
         print(option)
         if option == TOTALCONTACT:
             sendTotalList(conn,addr)
+        elif option == LOGIN:
+            Login(conn,addr)
 
 run()
 
