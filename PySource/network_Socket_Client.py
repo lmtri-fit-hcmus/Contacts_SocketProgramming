@@ -26,31 +26,31 @@ class SearchListWindow(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         #self.pack(side=tk.LEFT, padx=20)
-        tv=ttk.Treeview(self)
+        self.tv=ttk.Treeview(self)
 
         # Define our columns
-        tv['column']=("ID","Name","Avatar","Download")
+        self.tv['column']=("ID","Name","Avatar","Download")
         
         # Formate our columns
-        tv.column("#0",width=0,stretch=NO)
-        tv.column("ID",anchor=W,width=75)
-        tv.column("Name",anchor=W,width=200)
-        tv.column("Avatar",anchor=CENTER,width=200)
-        tv.column("Download",anchor=CENTER,width=75)
+        self.tv.column("#0",width=0,stretch=NO)
+        self.tv.column("ID",anchor=W,width=75)
+        self.tv.column("Name",anchor=W,width=200)
+        self.tv.column("Avatar",anchor=CENTER,width=200)
+        self.tv.column("Download",anchor=CENTER,width=75)
         
         # Create heading
        # tv.heading("#0",text="ID",anchor=CENTER)
-        tv.heading("ID",text="ID",anchor=CENTER)
-        tv.heading("Name",text="Name",anchor=CENTER)
-        tv.heading("Avatar",text="Avatar",anchor=CENTER)
-        tv.heading("Download",text="Download",anchor=CENTER)
+        self.tv.heading("ID",text="ID",anchor=CENTER)
+        self.tv.heading("Name",text="Name",anchor=CENTER)
+        self.tv.heading("Avatar",text="Avatar",anchor=CENTER)
+        self.tv.heading("Download",text="Download",anchor=CENTER)
         
         img=ImageTk.PhotoImage(Image.open(str(1)+".png"))
 
         my_label=Label(image=img)
         my_label.pack()
 
-        tv.pack(pady=20)
+        self.tv.pack(pady=20)
 
         my_img=Label(image=img)
         my_img
@@ -62,7 +62,7 @@ class SearchListWindow(tk.Frame):
         btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(HomePage))
         btn_logout.pack()
         # Pack to the screen
-        tv.pack(pady=20)
+        self.tv.pack(pady=20)
 
         
 
@@ -240,6 +240,12 @@ class App(tk.Tk):
         sck.sendall(Client.TOTALCONTACT.encode(FORMAT))
         sck.recv(1024)
         ListContacts = Client.TotalContact(sck)
+        i = 1
+        for contanct in ListContacts:
+            contanct = contanct[1:len(contanct)-1]
+            contanct = contanct.split(', ')
+            self.frames[SearchListWindow].tv.insert(parent='',index='end',iid=i,text="",values=(contanct[0],contanct[1],contanct[5],"Down"))
+            i +=1
         self.showPage(curFrame)
 
     def showSpecificContact(self,curFrame,sck):
