@@ -34,16 +34,13 @@ def TotalContact(client):
     #     option = client.recv(1024).decode(FORMAT)
     # return list
     list = []
-
-    item = client.recv(1024).decode(FORMAT)
-
+    item = client.recv(2048).decode(FORMAT)
     while (item != "end"):
-        
         list.append(item)
         print(item)
         #response
-        client.sendall(item.encode(FORMAT))
-        item = client.recv(1024).decode(FORMAT)
+        client.sendall("ok".encode(FORMAT))
+        item = client.recv(2048).decode(FORMAT)
     
     return list
 

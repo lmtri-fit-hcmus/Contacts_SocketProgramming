@@ -44,11 +44,12 @@ class SearchListWindow(tk.Frame):
         tv.heading("Name",text="Name",anchor=CENTER)
         tv.heading("Avatar",text="Avatar",anchor=CENTER)
         tv.heading("Download",text="Download",anchor=CENTER)
-
+        
         img=ImageTk.PhotoImage(Image.open(str(1)+".png"))
 
         my_label=Label(image=img)
         my_label.pack()
+
         tv.pack(pady=20)
 
         my_img=Label(image=img)
@@ -58,7 +59,7 @@ class SearchListWindow(tk.Frame):
         # for i in range(1,5):
         #     tv.insert(parent='',index='end',iid=i,text="",values=(str(i),"Le Ngoc Duc",ImageTk.PhotoImage(Image.open(str(i)+".png")),"Down"))
         
-        btn_logout=tk.Button(self,text="Log Out", command=lambda:appController.showPage(HomePage))
+        btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(HomePage))
         btn_logout.pack()
         # Pack to the screen
         tv.pack(pady=20)
@@ -239,7 +240,6 @@ class App(tk.Tk):
         sck.sendall(Client.TOTALCONTACT.encode(FORMAT))
         sck.recv(1024)
         ListContacts = Client.TotalContact(sck)
-        print(ListContacts)
         self.showPage(curFrame)
 
     def showSpecificContact(self,curFrame,sck):
