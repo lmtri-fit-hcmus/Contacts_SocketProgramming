@@ -58,7 +58,9 @@ class SearchListWindow(tk.Frame):
         # Add data test
         # for i in range(1,5):
         #     tv.insert(parent='',index='end',iid=i,text="",values=(str(i),"Le Ngoc Duc",ImageTk.PhotoImage(Image.open(str(i)+".png")),"Down"))
-        
+        btn_download=tk.Button(self,text="Download avatar", command=lambda:appController.DownFullAvatar())
+        btn_download.pack()
+
         btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(HomePage))
         btn_logout.pack()
         # Pack to the screen
@@ -74,7 +76,6 @@ class SpecificContactWindow(tk.Frame):
         #img2=ImageTk.PhotoImage(img)
         #label_title=tk.Label(self,image=img2)
         #label_title.pack()
-
         self.label_mu=tk.Label(self,text="")
         btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(HomePage))
 
@@ -241,22 +242,31 @@ class App(tk.Tk):
         sck.recv(1024)
         ListContacts = Client.TotalContact(sck)
         i = 1
+        self.listSmallAvaPath=[]
         for contanct in ListContacts:
             contanct = contanct[1:len(contanct)-1]
             contanct = contanct.split(', ')
             self.frames[SearchListWindow].tv.insert(parent='',index='end',iid=i,text="",values=(contanct[0],contanct[1],contanct[5],"Down"))
+            self.listSmallAvaPath.append(contanct[5])
             i +=1
         self.showPage(curFrame)
 
     def showSpecificContact(self,curFrame,sck):
         ID = curFrame.entry_user.get()
-        sck.sendall(Client.SPECONTACT.encode(FORMAT))
-        SpeClient = Client.GetSpecificContact(sck,ID)
-        if SpeClient == 'None':
-            self.frames[SpecificContactWindow].label_mu["text"] = "Not Found"
+        if(ID==''):
+            self.frames[HomePage].label_notice3["text"] = "Field can not be empty"
         else:
-            self.frames[SpecificContactWindow].label_mu["text"] = SpeClient
-        self.showPage(SpecificContactWindow)
+            sck.sendall(Client.SPECONTACT.encode(FORMAT))
+            SpeClient = Client.GetSpecificContact(sck,ID)
+            if SpeClient == 'None':
+                self.frames[SpecificContactWindow].label_mu["text"] = "Not Found"
+            else:
+                self.frames[SpecificContactWindow].label_mu["text"] = SpeClient
+            self.showPage(SpecificContactWindow)
+    def DownFullAvatar(self):
+        for i in self.listSmallAvaPath:
+            print(i)
+            #
         
     def logOut(self, sck):
         sck.sendall(LOGOUT.encode(FORMAT))
