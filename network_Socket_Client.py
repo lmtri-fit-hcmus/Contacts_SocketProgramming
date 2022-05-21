@@ -21,7 +21,7 @@ LOGIN= "login"
 LOGOUT = "logout"
 PATH = "1.png"
 
-class SearchListWindow(tk.Frame):
+class TotalContactsWindow(tk.Frame):
     def __init__(self, parent, appController):
         tk.Frame.__init__(self, parent)
 
@@ -55,13 +55,10 @@ class SearchListWindow(tk.Frame):
         my_img=Label(image=img)
         my_img
 
-        # Add data test
-        # for i in range(1,5):
-        #     tv.insert(parent='',index='end',iid=i,text="",values=(str(i),"Le Ngoc Duc",ImageTk.PhotoImage(Image.open(str(i)+".png")),"Down"))
         btn_download=tk.Button(self,text="Download avatar", command=lambda:appController.DownFullAvatar())
         btn_download.pack()
 
-        btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(HomePage))
+        btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(SelectOptionWindow))
         btn_logout.pack()
         # Pack to the screen
         self.tv.pack(pady=20)
@@ -77,14 +74,14 @@ class SpecificContactWindow(tk.Frame):
         #label_title=tk.Label(self,image=img2)
         #label_title.pack()
         self.label_mu=tk.Label(self,text="")
-        btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(HomePage))
+        btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(SelectOptionWindow))
 
         self.label_mu.pack()
         btn_logout.pack()
         # global img
         #img.show()
 
-class StartPage(tk.Frame):
+class LogInWindow(tk.Frame):
     def __init__(self, parent,appController):
         tk.Frame.__init__(self,parent)
 
@@ -97,7 +94,7 @@ class StartPage(tk.Frame):
         #self.entry_user.insert(0,"Ex: lengocduc195@gmail.com")
         self.entry_pswd=tk.Entry(self,width=20, bg='light yellow',borderwidth=5)
 
-        button_log=tk.Button(self, text="LOG IN", command=lambda:appController.logIn(self, client))
+        button_log=tk.Button(self, text="LOG IN", command=lambda:appController.LogIn(self, client))
         button_log.configure(width=10)
 
         label_title.pack()
@@ -119,14 +116,14 @@ class StartPage(tk.Frame):
         #Label(self, text="I have default font-size").pack(pady=20)
         #Label(self, text="I have default font-size",font=("Arial",25)).pack(pady=20)
 
-class HomePage(tk.Frame):
+class SelectOptionWindow(tk.Frame):
     def __init__(self,parent, appController):
         tk.Frame.__init__(self, parent)
 
         label_title=tk.Label(self, text="HOME PAGE",font="Arial,45")
         label_user=tk.Label(self,text="Find")
         self.entry_user=tk.Entry(self,width=20, bg='light yellow',borderwidth=5)
-        btn_SearchList=tk.Button(self,text="Search List",command=lambda:appController.showTotalContact(SearchListWindow,client))
+        btn_SearchList=tk.Button(self,text="Search List",command=lambda:appController.showTotalContact(TotalContactsWindow,client))
         btn_Search=tk.Button(self,text="Search",command=lambda:appController.showSpecificContact(self,client))
         btn_logout=tk.Button(self,text="Log Out", command=lambda:appController.logOut(client))
         self.label_notice1=tk.Label(self, text="")
@@ -157,39 +154,24 @@ class App(tk.Tk):
         container.configure(bg="red")
         
         container.pack()
-        #home_page.pack()
-
-        #start_page.pack()
 
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0,weight=1)
         container.grid_columnconfigure(0,weight=1)
 
-        #start_page=StartPage(container)
-        #home_page=HomePage(container)
-
-        #start_page.grid(row=0,column=0,sticky="nsew")
-        #home_page.grid(row=0,column=0,sticky="nsew")
-
-        #start_page.tkraise()
-        
-        #home_page.tkraise()
-
         self.frames={}
-        for F in (StartPage,HomePage,SpecificContactWindow,SearchListWindow):
+        for F in (LogInWindow,SelectOptionWindow,SpecificContactWindow,TotalContactsWindow):
             frame=F(container, self)
             frame.grid(row=0,column=0,sticky="nsew")
             self.frames[F]=frame
 
-        #self.frames[SearchListWindow].tkraise()
-        #self.frames[SearchEntire].tkraise()
-        self.frames[StartPage].tkraise()
+        self.frames[LogInWindow].tkraise()
 
-    def showPage(self, FrameClass):
+    def ShowPage(self, FrameClass):
         self.frames[FrameClass].tkraise()
         
 
-    def logIn(self, curFrame, sck):
+    def LogIn(self, curFrame, sck):
         try:
             # Get data from box
             client.sendall(LOGIN.encode(FORMAT))
@@ -208,22 +190,6 @@ class App(tk.Tk):
                 return
             
             print(user, pswd)
-
-            #option=LOGIN
-            #sck.sendall(option.encode(FORMAT))
-            #sck.recv(1024)
-            #sck.sendall(user.encode(FORMAT))
-            #sck.recv(1024)
-            #sck.sendall(pswd.encode(FORMAT))
-            #sck.recv(1024)
-
-            #msg = sck.recv(1024).decode(FORMAT)
-            
-            # ____________________
-            # TEST
-            
-            
-            # ____________________
             if(accepted==2):
                 curFrame.label_notice["text"]="Invalid password"
                 return
@@ -231,13 +197,13 @@ class App(tk.Tk):
                 curFrame.label_notice["text"]="Account has been login by another"
                 return
             else:
-                self.showPage(HomePage)
+                self.ShowPage(SelectOptionWindow)
 
         
         except:
             print("Error: Server iss not responding")
 
-    def showTotalContact(self, curFrame, sck):
+    def ShowTotalContact(self, curFrame, sck):
         sck.sendall(Client.TOTALCONTACT.encode(FORMAT))
         sck.recv(1024)
         ListContacts = Client.TotalContact(sck)
@@ -246,15 +212,15 @@ class App(tk.Tk):
         for contanct in ListContacts:
             contanct = contanct[1:len(contanct)-1]
             contanct = contanct.split(', ')
-            self.frames[SearchListWindow].tv.insert(parent='',index='end',iid=i,text="",values=(contanct[0],contanct[1],contanct[5],"Down"))
+            self.frames[TotalContactsWindow].tv.insert(parent='',index='end',iid=i,text="",values=(contanct[0],contanct[1],contanct[5],"Down"))
             self.listSmallAvaPath.append(contanct[5])
             i +=1
-        self.showPage(curFrame)
+        self.ShowPage(curFrame)
 
-    def showSpecificContact(self,curFrame,sck):
+    def ShowSpecificContact(self,curFrame,sck):
         ID = curFrame.entry_user.get()
         if(ID==''):
-            self.frames[HomePage].label_notice3["text"] = "Field can not be empty"
+            self.frames[SelectOptionWindow].label_notice3["text"] = "Field can not be empty"
         else:
             sck.sendall(Client.SPECONTACT.encode(FORMAT))
             SpeClient = Client.GetSpecificContact(sck,ID)
@@ -262,16 +228,16 @@ class App(tk.Tk):
                 self.frames[SpecificContactWindow].label_mu["text"] = "Not Found"
             else:
                 self.frames[SpecificContactWindow].label_mu["text"] = SpeClient
-            self.showPage(SpecificContactWindow)
+            self.ShowPage(SpecificContactWindow)
     def DownFullAvatar(self):
         for i in self.listSmallAvaPath:
             print(i)
             #
         
-    def logOut(self, sck):
+    def LogOut(self, sck):
         sck.sendall(LOGOUT.encode(FORMAT))
         sck.recv(1024)
-        self.showPage(StartPage)
+        self.ShowPage(LogInWindow)
 
 client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 print("CLIENT SIDE")
@@ -283,3 +249,7 @@ except:
 app=App()
 #app.showPage(HomePage)
 app.mainloop()
+client.sendall(LOGOUT.encode(FORMAT))
+client.recv(1024)
+
+    

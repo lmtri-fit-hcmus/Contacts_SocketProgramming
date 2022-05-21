@@ -178,8 +178,8 @@ def handle_client_resquest(conn:socket, addr):
                 removeLiveAccount(conn, addr)
         print("stop")
         removeLiveAccount(conn, addr)
-    except:
-        print("Client end!")
+    except ConnectionResetError:
+        #print("Client end!")
         removeLiveAccount(conn, addr)
     
 ### ...........GUI..............###
