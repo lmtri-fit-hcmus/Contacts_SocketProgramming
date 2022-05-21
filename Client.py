@@ -8,6 +8,10 @@ FORMAT = "utf8"
 TOTALCONTACT = "TotalContacts"
 SPECONTACT = "SpecificContact"
 LOGIN = "login"
+ANIMAGE = "animage"
+ALLIMAGE = "alliamge"
+downloadDir = "Download_Image/"
+
 
 #Đầu ra là list 6 thuộc tính của 1 member 
 def ReceiveList(client):
@@ -51,54 +55,44 @@ def GetSpecificContact(client, ID):
     client.sendall(ID.encode(FORMAT))
     msg = client.recv(1024).decode(FORMAT)
     return msg
-#------------------main-----------------------
-
-# client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# print("CLIENT SIDE")
 
 
-# try:
-#     client.connect( (HOST, SERVER_PORT) )
-#     print("client address:",client.getsockname())
-
+def getImageFile(client, file_path):
+    client.sendall(file_path.encode(FORMAT))
+    # print("Send path")
+    print(downloadDir+file_path.split("/")[-1])
+    last_line = client.recv(2048)
+    client.sendall(last_line)
+    print(downloadDir+file_path.split("/")[-1])
+    with open(downloadDir+file_path.split("/")[-1], "wb") as file:
+        while True:
+            data = client.recv(2048)
+                # client.sendall(data)
+                # flag = int(client.recv(1024).decode(FORMAT))
+            client.sendall(data)
+            # state = client.recv(1024).decode(FORMAT)
+            if data ==last_line:
+                break
+            file.write(data)
+        print("Break")
+        file.close()
+    print("Done")
+    # client.recv(1024)
     
-#     user = input("User:")
-#     client.sendall(user.encode(FORMAT))
-#     client.recv(1024)
 
-
-#     passw = input("Pass:")
-#     client.sendall(passw.encode(FORMAT))
-
-#     accepted = int(client.recv(1024).decode(FORMAT))
-#     print(accepted)
-#     if (accepted == 0): 
-#         print("Account has been login by another")
-#     elif accepted == 1:
-#         print("Successfully login")
-#         msg = None
-#         while (msg != "x"):
-#             msg = input("talk: ")
-#             client.sendall(msg.encode(FORMAT))
-
-#             # functions called by client 
-#             # if (msg == LOGIN): 
-#             #     # wait response
-#             #     client.recv(1024)
-#             #     clientLogin(client)
-#             if(msg == TOTALCONTACT):
-#                 lists = TotalContact(client)
-#                 print(lists)
-#             elif(msg == SPECONTACT):
-#                 client.recv(1024)
-#                 ID = input("Input ID to check contact: ")
-#                 lists = GetSpecificContact(client,ID)
-#                 print(lists)
-#     elif accepted == 2:
-#         print("Wrong username or password")
-#     input()
-# except:
-#     print("Error")
-
-
-# client.close()
+def getFullImageFile(client):
+    # option = TOTALCONTACT
+    client.sendall(ALLIMAGE.encode(FORMAT))
+    client.recv(1024)
+    lists = TotalContact(client)
+    print(lists)
+    for item in lists:
+        item = item[1:len(item)-1]
+        item = item.split(', ')
+        print(item)
+        image_path = (item[5])
+        # [1:len(image_path)-1]
+        image_path = image_path[1:len(image_path) -1]
+        print(image_path)
+        getImageFile(client, image_path)
+    client.sendall("end".encode(FORMAT))

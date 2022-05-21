@@ -19,7 +19,8 @@ import sqlite3
 from tkinter import Tk, Button, Canvas
 from PIL import Image, ImageFont
 from matplotlib import image
-import server
+
+# import server
 
 
 
@@ -32,6 +33,9 @@ TOTALCONTACT = "TotalContacts"
 SPECONTACT = "SpecificContact"
 LOGIN = "login"
 LOGOUT = "logout"
+ANIMAGE = "animage"
+ALLIMAGE = "alliamge"
+
 END = "x"
 ADMIN_NAME = "socket"
 ADMIN_PASS = "admin"
@@ -62,15 +66,15 @@ def run():
         print("error")
 
 def connect_db(db_name):
-    driver = "ODBC Driver 17 for SQL Server"
-    server = 'MINHTRI\MINHTRI'
-    user = 'lmtri'
-    password = '1'
-
     # driver = "ODBC Driver 17 for SQL Server"
     # server = 'HUUTRONG'
     # user = 'socket'
     # password = '123456'
+
+    driver = "ODBC Driver 17 for SQL Server"
+    server = 'MINHTRI\MINHTRI'
+    user = 'lmtri'
+    password = '1'
     
     cnxn = pyodbc.connect('driver={%s};server=%s;database=%s;uid=%s;pwd=%s' % ( driver, server, db_name, user, password ) )
     return cnxn.cursor()
@@ -138,7 +142,7 @@ def getTotalList():
         lists.append(st)
     return lists
 
-def sendTotalList(sck: socket, addr):
+def sendTotalList(sck: socket):
     lists = getTotalList()
     for item in lists:
         print(item)
@@ -166,7 +170,7 @@ def handle_client_resquest(conn:socket, addr):
             print(option)
             if option == TOTALCONTACT:
                 conn.sendall(option.encode(FORMAT))
-                sendTotalList(conn,addr)
+                sendTotalList(conn)
             elif option == SPECONTACT:
                 conn.sendall(option.encode(FORMAT))
                 sendSpecificContact(conn, addr)
@@ -176,12 +180,47 @@ def handle_client_resquest(conn:socket, addr):
             elif option == LOGOUT:
                 conn.sendall(option.encode(FORMAT))
                 removeLiveAccount(conn, addr)
+            elif option == ANIMAGE:
+                conn.sendall(option.encode(FORMAT))
+                DownloadImage(conn)
+            elif option == ALLIMAGE:
+                conn.sendall(option.encode(FORMAT))
+                DownloadFullImage(conn)
         print("stop")
         removeLiveAccount(conn, addr)
     except ConnectionResetError:
         #print("Client end!")
         removeLiveAccount(conn, addr)
+
+def DownloadImage(conn:socket, file_path):
+    print(file_path)
+    last_line = NONE
+    with open(file_path, 'rb') as f:
+        last_line = f.readlines()[-1]
+        conn.sendall(last_line)
+        conn.recv(2048)
+    with open(file_path, 'rb') as file:
+        print("starting")
+        for data in file:
+            print(data)
+            conn.sendall(data)
+            conn.recv(2048)
+            # if data == last_line:
+            #     conn.sendall("DONE".encode(FORMAT))
+            #     print("DONE")
+            # else:
+            #     conn.sendall("UNF".encode(FORMAT))
+            #     print("UNF")
+    file.close()
     
+def DownloadFullImage(conn: socket):
+    sendTotalList(conn)
+    file_path = ""
+    while(file_path !="end"):
+        file_path = conn.recv(1024).decode(FORMAT)
+        print(file_path)
+        DownloadImage(conn, file_path)
+
 ### ...........GUI..............###
 
 #       Hàm đăng nhập trên máy server 
@@ -396,13 +435,22 @@ class App(tk.Tk):
     def resize(self,curFrame,w,h):
         self.geometry(f"{w}x{h}")
         
+# print("SERVER SIDE")
+# print("server: ", HOST, PORT)
+# print("Waiting for client")
+# conn, addr = server.accept()
+# print("Connection:", addr)
+# DownloadFullImage(conn)
+# DownloadImage(conn, "Avatar/SmallAvatar/lmtri.png")
 
+# input()
 
-        
+ 
 sThread = threading.Thread(target=run)
 sThread.daemon = True 
 sThread.start()
 print("Hello")
+
 
 app=App()
 #app.showPage(HomePage)

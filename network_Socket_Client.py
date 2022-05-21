@@ -1,3 +1,4 @@
+from email.mime import application
 from multiprocessing.connection import Client
 from pydoc import cli
 import tkinter as tk
@@ -20,6 +21,29 @@ FORMAT = "utf8"
 LOGIN= "login"
 LOGOUT = "logout"
 PATH = "1.png"
+
+def TotalContact(client):
+    # list=[]
+    # option = None
+    # count = 0
+    # while option != 'end':
+    #     list.append([])
+    #     for i in range(0,6):
+    #         list[count].append(client.recv(1024).decode(FORMAT))
+    #         client.sendall(list[count][i].encode(FORMAT))
+    #     count += 1
+    #     option = client.recv(1024).decode(FORMAT)
+    # return list
+    list = []
+    item = client.recv(2048).decode(FORMAT)
+    while (item != "end"):
+        print(type(item))
+        list.append(item)
+        #response
+        client.sendall("ok".encode(FORMAT))
+        item = client.recv(2048).decode(FORMAT)
+    
+    return list
 
 class TotalContactsWindow(tk.Frame):
     def __init__(self, parent, appController):
@@ -55,13 +79,19 @@ class TotalContactsWindow(tk.Frame):
         my_img=Label(image=img)
         my_img
 
-        btn_download=tk.Button(self,text="Download avatar", command=lambda:appController.DownFullAvatar())
+        btn_download=tk.Button(self,text="Download avatar", command=lambda:Client.getFullImageFile(client))
         btn_download.pack()
 
-        btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(SelectOptionWindow))
+        btn_logout=tk.Button(self,text="Back", command=lambda:self.back(appController))
         btn_logout.pack()
         # Pack to the screen
         self.tv.pack(pady=20)
+    def back(self,appController):
+        for item in self.tv.get_children():
+            self.tv.delete(item)
+        appController.ShowPage(SelectOptionWindow)      
+            
+        
 
         
 
@@ -74,7 +104,7 @@ class SpecificContactWindow(tk.Frame):
         #label_title=tk.Label(self,image=img2)
         #label_title.pack()
         self.label_mu=tk.Label(self,text="")
-        btn_logout=tk.Button(self,text="Back", command=lambda:appController.showPage(SelectOptionWindow))
+        btn_logout=tk.Button(self,text="Back", command=lambda:appController.ShowPage(SelectOptionWindow))
 
         self.label_mu.pack()
         btn_logout.pack()
@@ -123,9 +153,9 @@ class SelectOptionWindow(tk.Frame):
         label_title=tk.Label(self, text="HOME PAGE",font="Arial,45")
         label_user=tk.Label(self,text="Find")
         self.entry_user=tk.Entry(self,width=20, bg='light yellow',borderwidth=5)
-        btn_SearchList=tk.Button(self,text="Search List",command=lambda:appController.showTotalContact(TotalContactsWindow,client))
-        btn_Search=tk.Button(self,text="Search",command=lambda:appController.showSpecificContact(self,client))
-        btn_logout=tk.Button(self,text="Log Out", command=lambda:appController.logOut(client))
+        btn_SearchList=tk.Button(self,text="Search List",command=lambda:appController.ShowTotalContact(TotalContactsWindow,client))
+        btn_Search=tk.Button(self,text="Search",command=lambda:appController.ShowSpecificContact(self,client))
+        btn_logout=tk.Button(self,text="Log Out", command=lambda:appController.LogOut(client))
         self.label_notice1=tk.Label(self, text="")
         self.label_notice2=tk.Label(self, text="")
         self.label_notice3=tk.Label(self, text="")
@@ -206,7 +236,7 @@ class App(tk.Tk):
     def ShowTotalContact(self, curFrame, sck):
         sck.sendall(Client.TOTALCONTACT.encode(FORMAT))
         sck.recv(1024)
-        ListContacts = Client.TotalContact(sck)
+        ListContacts = TotalContact(sck)
         i = 1
         self.listSmallAvaPath=[]
         for contanct in ListContacts:
@@ -229,11 +259,7 @@ class App(tk.Tk):
             else:
                 self.frames[SpecificContactWindow].label_mu["text"] = SpeClient
             self.ShowPage(SpecificContactWindow)
-    def DownFullAvatar(self):
-        for i in self.listSmallAvaPath:
-            print(i)
-            #
-        
+
     def LogOut(self, sck):
         sck.sendall(LOGOUT.encode(FORMAT))
         sck.recv(1024)
